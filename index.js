@@ -1,4 +1,6 @@
 var express = require('express');
+var TestModel = require('./model/model')
+var db = require('./DBConnection')
 var app = express();
 var port = 5000;
 
@@ -20,18 +22,13 @@ var port = 5000;
 //     console.log(err)
 // })
 
-var mongo = require('mongodb').MongoClient
-mongo.connect("mongodb://localhost:27017/uranai", function(err, db){
-    if (err) throw err
-    console.log('connect')
-    db.close
-})
-
 app.get('/', function(req, res){
     console.log(connection)
 });
 app.get('/test', function(req, res){
     res.send('test ok')
+    var testEntity = new TestModel({test: 'test1'})
+    console.log(testEntity)
 });
 
 app.listen(port, function(){
