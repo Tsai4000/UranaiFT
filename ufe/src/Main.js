@@ -1,20 +1,28 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import hiki from './images/hiki.png'
+import  './css/main.css'
+
+const style = {
+  display: 'flex',
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center'
+}
 
 const Main = () => {
-  const testState = useSelector(state => state.testStore);
-  const dispatch = useDispatch();
-  const test = () => {
-    dispatch({
-      type: 'TEST_STORE',
-      payload: 'test ok'
+  const [result, setResult] = useState(null)
+  const path = window.location.href
+  const hiku = () => {
+    fetch(path+'hiku')
+    .then((err, res) => {
+      if(err) throw(err)
+      setResult(res)
     })
-  }
-  console.log(testState)
+    .catch(err => console.log(err))
+  } 
   return (
-    <div>
-      <button type='button' onClick={test}>click to test</button>
-      {testState}
+    <div style={style}>
+      {!result ? <img src={hiki} onClick={hiku} alt='hiki'/> : result}
     </div>
   )
 }
