@@ -67,7 +67,11 @@ app.post('/mikuji', function(req, res){
 })
 
 app.get('/hiku', function(req, res){
-    
+    console.log('random one mikuji')
+    db.collection('mikujis').aggregate([{ $sample: { size: 1 }}]).toArray(function(err, data){
+        if (err) res.status(400).send(err.details[0].message)
+        res.status(200).send(data)
+    })
 })
 
 app.listen(port, function(){
