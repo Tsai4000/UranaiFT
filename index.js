@@ -2,6 +2,7 @@ const express = require('express');
 const TestModel = require('./model/model')
 const SampleModel = require('./model/sample')
 const MikujiModel = require('./model/mikuji');
+const handleError = require('./error/errorHandle')
 const bodyParser = require('body-parser')
 const db = require('./DBConnection');
 const port = 5000;
@@ -57,7 +58,7 @@ app.post('/mikuji', function(req, res){
     console.log(req.body, 'add mikuji')
     if(req.body.mikuji){
         MikujiModel.create(req.body.mikuji, function(err, ent){
-            if(err) res.status(400).send(err.details[0].message)
+            if(err) return res.status(400).send(handleError(err))
             console.log(ent)
             res.status(200).send('ok')
         })
@@ -69,7 +70,7 @@ app.post('/mikuji', function(req, res){
 app.get('/hiku', function(req, res){
     console.log('random one mikuji')
     db.collection('mikujis').aggregate([{ $sample: { size: 1 }}]).toArray(function(err, data){
-        if (err) res.status(400).send(err.details[0].message)
+        if (err) return res.status(400).send(err.details[0].message)
         res.status(200).send(data)
     })
 })
