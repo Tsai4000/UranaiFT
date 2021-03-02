@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import hiki from './images/hiki.png'
+import Result from './component/result'
 import  './css/main.css'
 
 const style = {
@@ -11,9 +12,9 @@ const style = {
 
 const Main = () => {
   const [result, setResult] = useState(null)
-  const path = window.location.href
+  // const path = window.location.href
   const hiku = () => {
-    fetch(path+'hiku')
+    fetch('/api/test')
     .then((err, res) => {
       if(err) throw(err)
       setResult(res)
@@ -22,7 +23,7 @@ const Main = () => {
   } 
   return (
     <div style={style}>
-      {!result ? <img src={hiki} onClick={hiku} alt='hiki'/> : result}
+      {!result ? <img src={hiki} onClick={hiku} alt='hiki'/> : <Result result />}
     </div>
   )
 }

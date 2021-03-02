@@ -32,5 +32,5 @@ app.get('/test', function(req, res){
 });
 
 app.listen(port, function(){
-    console.log("info",'Server is running at port : ' + port);
+    console.log("info", 'Server is running at port : ' + port);
 });
