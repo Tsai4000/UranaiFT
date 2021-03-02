@@ -11,7 +11,12 @@ const style = {
 }
 
 const Main = () => {
-  const [result, setResult] = useState(null)
+  const [result, setResult] = useState(null)/*{
+    fate: 'f',
+    overview: 'o',
+    wish: 'w',
+    pp: 'sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss'
+  })*/
   // const path = window.location.href
   const hiku = () => {
     fetch('/api/test')
@@ -23,7 +28,7 @@ const Main = () => {
   } 
   return (
     <div style={style}>
-      {!result ? <img src={hiki} onClick={hiku} alt='hiki'/> : <Result result />}
+      {!result ? <img src={hiki} onClick={hiku} alt='hiki'/> : <Result result={result}/>}
     </div>
   )
 }
