@@ -38,7 +38,7 @@ app.get('/test', function(req, res){
     console.log(testEntity)
 });
 
-app.get('/insert', function(req, res){
+app.get('/api/insert', function(req, res){
     console.log(req.path, 'call insert')
     SampleModel.create({
         lucky: Math.floor(Math.random()*100),
@@ -54,7 +54,7 @@ app.get('/insert', function(req, res){
     })
 })
 
-app.post('/mikuji', function(req, res){
+app.post('/api/mikuji', function(req, res){
     console.log(req.body, 'add mikuji')
     if(req.body.mikuji){
         MikujiModel.create(req.body.mikuji, function(err, ent){
@@ -67,11 +67,15 @@ app.post('/mikuji', function(req, res){
     }
 })
 
-app.get('/hiku', function(req, res){
+app.get('/api/hiku', function(req, res){
     console.log('random one mikuji')
-    db.collection('mikujis').aggregate([{ $sample: { size: 1 }}]).toArray(function(err, data){
+    db.collection('mikujis').aggregate([
+        { $sample: { size: 1 } }, 
+        { $project: { _id: false } }
+    ]).toArray(function(err, data) {
         if (err) return res.status(400).send(err.details[0].message)
-        res.status(200).send(data)
+        console.log(data)
+        res.status(200).json(data[0])
     })
 })
 
