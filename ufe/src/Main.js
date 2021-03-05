@@ -14,10 +14,8 @@ const Main = () => {
   const [result, setResult] = useState(null)
   const hiku = () => {
     fetch('/api/hiku')
-    .then((err, res) => {
-      if(err) throw(err)
-      setResult(res)
-    })
+    .then(res => res.json())
+    .then(data => setResult(data))
     .catch(err => console.log(err))
   } 
   return (

@@ -4,7 +4,8 @@ import Overview from './overview'
 import background from '../images/background.png'
 
 const base = {
-    maxWidth: "600px",
+    maxWidth: "400px",
+    width: "100%",
     display: "flex",
     flex: 1,
     flexDirection: "column",
@@ -13,10 +14,12 @@ const base = {
     backgroundPosition: "center",
     backgroundImage: `url(${background})`,
     backgroundRepeat: "no-repeat",
-    backgroundSize: "contain",
+    backgroundSize: `430px 100%`,
     padding: "15px"
 }
-const detailStyle = {
+const detailContainerStyle = {
+    width: "100%",
+    maxWidth: "400px",
     flexDirection: "raw",
     justifyContent: "flex-start",
     alignItems: "flex-start"
@@ -27,9 +30,9 @@ const Result = (props) => {
 
     return (
         <div style={base}>
-            <Overview fate={result.fate} content={result.overview} />
-            <div style={detailStyle}>{Object.keys(result).map((key, value) => {
-                    if (key !== 'overview' && key !== 'fate') return (<Detail title={key} content={result[key]}/>)
+            <Overview fortune={result.fortune} content={result.overview} />
+            <div style={detailContainerStyle}>{Object.keys(result).map((key, value) => {
+                    return (key !== 'overview' && key !== 'fortune') ? (<Detail title={key} content={result[key]}/>) : null
                 })}
             </div>
         </div>
