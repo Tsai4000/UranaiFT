@@ -2,7 +2,7 @@ var mongoose = require('mongoose')
 
 var MikujiSchema = new mongoose.Schema({
     fortune: { type: String, required: true },
-    overView: { type: String, required: true },
+    overview: { type: String, required: true },
     wish: { type:String, required: true },
     wait: { type: String, required: true },
     lost: { type: String, required: true },
