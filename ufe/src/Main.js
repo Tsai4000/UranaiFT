@@ -11,15 +11,9 @@ const style = {
 }
 
 const Main = () => {
-  const [result, setResult] = useState(null)/*{
-    fate: 'f',
-    overview: 'o',
-    wish: 'w',
-    pp: 'sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss'
-  })*/
-  // const path = window.location.href
+  const [result, setResult] = useState(null)
   const hiku = () => {
-    fetch('/api/test')
+    fetch('/api/hiku')
     .then((err, res) => {
       if(err) throw(err)
       setResult(res)
