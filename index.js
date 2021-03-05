@@ -71,7 +71,7 @@ app.get('/api/hiku', function(req, res){
     console.log('random one mikuji')
     db.collection('mikujis').aggregate([
         { $sample: { size: 1 } }, 
-        { $project: { _id: false } }
+        { $project: { _id: false, __v: false } }
     ]).toArray(function(err, data) {
         if (err) return res.status(400).send(err.details[0].message)
         console.log(data)
