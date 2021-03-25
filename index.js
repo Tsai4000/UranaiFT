@@ -8,6 +8,7 @@ const handleError = require('./error/errorHandle')
 const bodyParser = require('body-parser')
 const db = require('./DBConnection')
 const utils = require('./util/util')
+const mikujiActions = require('./action/mikuji')
 const port = 5000;
 const app = express()
 const hrs = 1 // 1hour
@@ -45,29 +46,11 @@ app.get('/test', function(req, res){
 
 app.get('/api/insert', function(req, res){
     console.log('insert GET')
-    const rand = (max) => Math.floor(Math.random() * Math.floor(max)) //move to util
-    MikujiModel.aggregate([
-        { $sample: { size: rand(10) } },
-        { $project: { _id: false, __v: false} }
-    ]).then(data => {
-        // console.log(data)
-        const newKuji = Object.fromEntries(Object.entries(data[0]).map(([key, v]) => {
-            return [key, data[rand(data.length)][key]]
-        }))
-        // console.log(newKuji)
-        MikujiModel.create(newKuji, function(err, ent){
-            if(err) return res.status(400).send(handleError(err))
-            // console.log(ent)
-            res.status(200).send('ok')
-        })
-    }).catch(err => {
-        console.log(err)
-    })
+    mikujiActions.insertMikuji(res, null)
 })
 
 app.post('/api/insert', function(req, res){
     console.log('insert POST')
-    const rand = (max) => Math.floor(Math.random() * Math.floor(max)) //move to util
     fetch(AIserver+'/predict', {
         method: 'POST',
         body: JSON.stringify(req.body),
@@ -79,25 +62,7 @@ app.post('/api/insert', function(req, res){
         // console.log(result)
         return utils.judgePredict(predict)
     }).then(fate => {
-        MikujiModel.aggregate([
-            { $match: { fate: fate } },
-            { $sample: { size: rand(10) } },
-            { $project: { _id: false, __v: false} }
-        ]).then(data => {
-            // console.log(data)
-            const newKuji = Object.fromEntries(Object.entries(data[0]).map(([key, v]) => {
-                return [key, data[rand(data.length)][key]]
-            }))
-            // console.log(newKuji)
-            MikujiModel.create(newKuji, function(err, ent){
-                if(err) return res.status(400).send(handleError(err))
-                // console.log(ent)
-                res.status(200).send('ok')
-            })
-        }).catch(err => {
-            console.log(err)
-            return res.status(400).json({ err: err })
-        })
+        mikujiActions.insertMikuji(res, fate)
     }).catch(err => {
         console.log(err)
         return res.status(400).json({ err: err })

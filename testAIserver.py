@@ -16,7 +16,7 @@ def testRedirect():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    print(request.get_json)
+    print(request.get_json())
     return make_response(jsonify({"result": random.uniform(-1, 1)}), 200)
 
 
