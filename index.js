@@ -72,7 +72,7 @@ app.post('/api/insert_AI', (req, res) => {
 app.post('/api/insert', (req, res) => {
   console.log(req.body, 'add mikuji')
   if (req.body.mikuji) {
-    MikujiModel.create(req.body.mikuji, function (err, ent) {
+    MikujiModel.create(req.body.mikuji, (err, ent) => {
       if (err) return res.status(400).send(handleError(err))
       console.log(ent)
       res.status(200).send('ok')
@@ -87,7 +87,7 @@ app.get('/api/hiku', (req, res) => {
   db.collection('mikujis').aggregate([
     { $sample: { size: 1 } },
     { $project: { _id: false, __v: false } }
-  ]).toArray(function (err, data) {
+  ]).toArray((err, data) => {
     if (err) return res.status(400).send(err.details[0].message)
     console.log(data)
     res.status(200).json(data[0])
@@ -153,6 +153,6 @@ app.get('/api/redirect', (req, res) => {
     })
 })
 
-app.listen(port, function () {
+app.listen(port, () => {
   console.log("info", 'Server is running at port : ' + port);
 });
