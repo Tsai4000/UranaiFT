@@ -35,21 +35,21 @@ app.use(express.urlencoded())
 //     console.log(err)
 // })
 
-app.get('/', function (req, res) {
+app.get('/', (req, res) => {
   console.log(connection)
 });
-app.get('/test', function (req, res) {
+app.get('/test', (req, res) => {
   res.send('test ok')
   const testEntity = new TestModel({ test: 'test1' })
   console.log(testEntity)
 });
 
-app.get('/api/insert', function (req, res) {
+app.get('/api/insert', (req, res) => {
   console.log('insert GET')
   mikujiActions.insertMikuji(res, null)
 })
 
-app.post('/api/insert_AI', function (req, res) {
+app.post('/api/insert_AI', (req, res) => {
   console.log('insert POST')
   fetch(AIserver + '/predict', {
     method: 'POST',
@@ -69,7 +69,7 @@ app.post('/api/insert_AI', function (req, res) {
     })
 })
 
-app.post('/api/insert', function (req, res) {
+app.post('/api/insert', (req, res) => {
   console.log(req.body, 'add mikuji')
   if (req.body.mikuji) {
     MikujiModel.create(req.body.mikuji, function (err, ent) {
@@ -82,7 +82,7 @@ app.post('/api/insert', function (req, res) {
   }
 })
 
-app.get('/api/hiku', function (req, res) {
+app.get('/api/hiku', (req, res) => {
   console.log('random one mikuji')
   db.collection('mikujis').aggregate([
     { $sample: { size: 1 } },
@@ -94,7 +94,7 @@ app.get('/api/hiku', function (req, res) {
   })
 })
 
-app.post('/api/user', function (req, res) {
+app.post('/api/user', (req, res) => {
   console.log('create user')
   // const isexist = db.collection('user').find({ name: req.body.name })
   UserModel.find({ name: req.body.name })
@@ -113,7 +113,7 @@ app.post('/api/user', function (req, res) {
     })
 })
 
-app.post('/api/login', function (req, res) {
+app.post('/api/login', (req, res) => {
   console.log('login')
   UserModel.find({ name: req.body.name, password: req.body.password })
     .then(data => {
@@ -139,7 +139,7 @@ app.post('/api/login', function (req, res) {
     })
 })
 
-app.get('/api/redirect', function (req, res) {
+app.get('/api/redirect', (req, res) => {
   console.log('redirect')
   fetch(AIserver + '/test')
     .then(response => {
