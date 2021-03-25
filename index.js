@@ -1,12 +1,14 @@
 const express = require('express');
 const TestModel = require('./model/model')
 const SampleModel = require('./model/sample')
-const MikujiModel = require('./model/mikuji');
+const MikujiModel = require('./model/mikuji')
+const UserModel = require('./model/user')
 const handleError = require('./error/errorHandle')
 const bodyParser = require('body-parser')
 const db = require('./DBConnection');
 const port = 5000;
 const app = express();
+const hrs = 1 // 1hour
 app.use(bodyParser.json());
 app.use(express.urlencoded());
 
@@ -76,6 +78,50 @@ app.get('/api/hiku', function(req, res){
         if (err) return res.status(400).send(err.details[0].message)
         console.log(data)
         res.status(200).json(data[0])
+    })
+})
+
+app.post('/api/user', function(req, res){
+    console.log('create user')
+    // const isexist = db.collection('user').find({ name: req.body.name })
+    UserModel.find({ name: req.body.name })
+    .then(data => {
+        if(data.length!==0){
+            console.log('User already exist')
+            return res.status(401).json({ errmsg: 'User already exist' })    
+        }else{
+            UserModel.create(req.body).then(() => {
+                return res.status(200).json({ msg: "User created"})
+            })
+        }
+    })
+    .catch(err => {
+        return res.status(500).json({ errmsg: err })
+    })
+})
+
+app.post('/api/login', function(req, res){
+    console.log('login')
+    UserModel.find({ name: req.body.name, password: req.body.password })
+    .then(data => {
+        if(data.length===0){
+            console.log('Login failed')
+            return res.status(401).json({ errmsg: 'Login failed' })    
+        }else{
+            const nowTime = Date.now()
+            const combine =  Buffer.from(nowTime.toString().concat(data[0].name))
+            const token = combine.toString('base64')
+            console.log(`now: ${nowTime}, token: ${token}`)
+            UserModel.updateOne(
+                { name: req.body.name, password: req.body.password },
+                { $set: { token: token, expired: nowTime+(hrs*60*60*1000) }
+            }).then(() => {
+                return res.status(200).json({ token: token })
+            })
+        }
+    })
+    .catch(err => {
+        return res.status(500).json({ errmsg: err })
     })
 })
 
