@@ -7,9 +7,11 @@ const UserModel = require('./model/user')
 const handleError = require('./error/errorHandle')
 const bodyParser = require('body-parser')
 const db = require('./DBConnection')
+const utils = require('./util/util')
 const port = 5000;
 const app = express()
 const hrs = 1 // 1hour
+const AIserver = 'http://localhost:5500'
 app.use(bodyParser.json())
 app.use(express.urlencoded())
 
@@ -42,18 +44,63 @@ app.get('/test', function(req, res){
 });
 
 app.get('/api/insert', function(req, res){
-    console.log(req.path, 'call insert')
-    SampleModel.create({
-        lucky: Math.floor(Math.random()*100),
-        wish: Math.floor(Math.random()*100)
-    }, function(err, ent){
-        if(err) console.log(err)
-        console.log(ent, 'inside')
+    console.log('insert GET')
+    const rand = (max) => Math.floor(Math.random() * Math.floor(max)) //move to util
+    MikujiModel.aggregate([
+        { $sample: { size: rand(10) } },
+        { $project: { _id: false, __v: false} }
+    ]).then(data => {
+        // console.log(data)
+        const newKuji = Object.fromEntries(Object.entries(data[0]).map(([key, v]) => {
+            return [key, data[rand(data.length)][key]]
+        }))
+        // console.log(newKuji)
+        MikujiModel.create(newKuji, function(err, ent){
+            if(err) return res.status(400).send(handleError(err))
+            // console.log(ent)
+            res.status(200).send('ok')
+        })
+    }).catch(err => {
+        console.log(err)
     })
-    const sampleCollection = db.collection('samples')
-    sampleCollection.find({__v: 0}).toArray(function(err, result){
-        if (err) throw(err)
-        res.send(result)
+})
+
+app.post('/api/insert', function(req, res){
+    console.log('insert POST')
+    const rand = (max) => Math.floor(Math.random() * Math.floor(max)) //move to util
+    fetch(AIserver+'/predict', {
+        method: 'POST',
+        body: JSON.stringify(req.body),
+        headers: { 'Content-Type': 'application/json' },
+    })
+    .then(response => response.json())
+    .then(result => {
+        const predict = result.predict
+        // console.log(result)
+        return utils.judgePredict(predict)
+    }).then(fate => {
+        MikujiModel.aggregate([
+            { $match: { fate: fate } },
+            { $sample: { size: rand(10) } },
+            { $project: { _id: false, __v: false} }
+        ]).then(data => {
+            // console.log(data)
+            const newKuji = Object.fromEntries(Object.entries(data[0]).map(([key, v]) => {
+                return [key, data[rand(data.length)][key]]
+            }))
+            // console.log(newKuji)
+            MikujiModel.create(newKuji, function(err, ent){
+                if(err) return res.status(400).send(handleError(err))
+                // console.log(ent)
+                res.status(200).send('ok')
+            })
+        }).catch(err => {
+            console.log(err)
+            return res.status(400).json({ err: err })
+        })
+    }).catch(err => {
+        console.log(err)
+        return res.status(400).json({ err: err })
     })
 })
 
@@ -128,7 +175,7 @@ app.post('/api/login', function(req, res){
 
 app.get('/api/redirect', function(req, res){
     console.log('redirect')
-    fetch('http://0.0.0.0:5500/test')
+    fetch(AIserver+'/test')
     .then(response => {
         return response.json()
     }).then(data => {
