@@ -1,16 +1,17 @@
-const express = require('express');
+const express = require('express')
+const fetch = require('node-fetch')
 const TestModel = require('./model/model')
 const SampleModel = require('./model/sample')
 const MikujiModel = require('./model/mikuji')
 const UserModel = require('./model/user')
 const handleError = require('./error/errorHandle')
 const bodyParser = require('body-parser')
-const db = require('./DBConnection');
+const db = require('./DBConnection')
 const port = 5000;
-const app = express();
+const app = express()
 const hrs = 1 // 1hour
-app.use(bodyParser.json());
-app.use(express.urlencoded());
+app.use(bodyParser.json())
+app.use(express.urlencoded())
 
 
 // var sql = require('mysql')
@@ -122,6 +123,20 @@ app.post('/api/login', function(req, res){
     })
     .catch(err => {
         return res.status(500).json({ errmsg: err })
+    })
+})
+
+app.get('/api/redirect', function(req, res){
+    console.log('redirect')
+    fetch('http://0.0.0.0:5500/test')
+    .then(response => {
+        return response.json()
+    }).then(data => {
+        console.log(data)
+        res.status(200).json(data)
+    }).catch(err => {
+        console.log('err', err)
+        res.status(400).json({ err: err.code })
     })
 })
 
