@@ -56,7 +56,12 @@ app.get('/test', (req, res) => {
 
 app.get('/api/insert', (req, res) => {
   console.log('insert GET')
-  mikujiActions.insertMikuji(res, null)
+  const checkToken = handleUserToken(req.body.token)
+  if (!checkToken) {
+    res.status(500).json({ msg: 'auth failed' })
+  } else {
+    mikujiActions.insertMikuji(res, null)
+  }
 })
 
 app.post('/api/insert_AI', (req, res) => {
@@ -71,11 +76,8 @@ app.post('/api/insert_AI', (req, res) => {
       headers: { 'Content-Type': 'application/json' },
     })
       .then(response => response.json())
-      .then(result => {
-        const predict = result.predict
-        console.log(result)
-        return utils.judgePredict(predict)
-      }).then(fate => {
+      .then(result => utils.judgePredict(result.predict))
+      .then(fate => {
         mikujiActions.insertMikuji(res, fate)
       }).catch(err => {
         console.log(err)
@@ -86,7 +88,10 @@ app.post('/api/insert_AI', (req, res) => {
 
 app.post('/api/insert', (req, res) => {
   console.log(req.body, 'add mikuji')
-  if (req.body.mikuji) {
+  const checkToken = handleUserToken(req.body.token)
+  if (!checkToken) {
+    res.status(500).json({ msg: 'auth failed' })
+  } else if (req.body.mikuji) {
     MikujiModel.create(req.body.mikuji, (err, ent) => {
       if (err) return res.status(400).send(handleError(err))
       console.log(ent)
