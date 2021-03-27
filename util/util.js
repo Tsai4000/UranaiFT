@@ -1,12 +1,3 @@
-exports.encode = (secret) => {
-  const token = secret //Buffer.from(secret).toString('base64')
-  return token
-}
-
-exports.decode = (secret) => {
-  return secret || '' //Buffer.from(20, secret, 'base64').toString('ascii')
-}
-
 exports.judgePredict = (predict) => {
   if (predict < -0.7) {
     return "Big"

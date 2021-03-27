@@ -13,7 +13,6 @@ const jwt = require('jsonwebtoken')
 const app = express()
 
 const port = 5000
-const hrs = (h) => h * 60 * 60 * 1000 // 1hour
 const AIserver = 'http://localhost:5500'
 const db = require('./DBConnection')
 
@@ -40,24 +39,15 @@ app.set('secret', 'testsecret1')
 //     console.log(err)
 // })
 
-const handleUserToken = (token) => {
-  const auths = utils.decode(token).split('-') // 0=>time 1=>username
-  console.log(auths)
-  if (auths[0] && Date.now() - Number(auths[0]) <= hrs(1)) {
-    return utils.encode(Date.now().toString() + '-' + auths[1])
-  } else {
-    return null
-  }
-}
-
 app.get('/', (req, res) => {
   console.log(connection)
-});
+})
+
 app.get('/test', (req, res) => {
   res.send('test ok')
   const testEntity = new TestModel({ test: 'test1' })
   console.log(testEntity)
-});
+})
 
 app.get('/api/mikuji', (req, res) => {
   console.log('random one mikuji')
