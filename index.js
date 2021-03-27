@@ -127,7 +127,7 @@ app.post('/api/login', (req, res) => {
 const appAuth = express.Router()
 
 appAuth.use(function (req, res, next) {
-  var token = req.body.token || req.query.token || req.headers['x-access-token']
+  const token = req.body.token || req.query.token || req.headers['authorization'].replace('Bearer ', '')
   if (token) {
     jwt.verify(token, app.get('secret'), (err, decoded) => {
       if (err) {
