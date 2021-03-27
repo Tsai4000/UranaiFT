@@ -5,17 +5,21 @@ const SampleModel = require('./model/sample')
 const MikujiModel = require('./model/mikuji')
 const UserModel = require('./model/user')
 const RKGKModel = require('./model/RKGKdata')
-const handleError = require('./error/errorHandle')
-const bodyParser = require('body-parser')
-const db = require('./DBConnection')
 const utils = require('./util/util')
 const mikujiActions = require('./action/mikuji')
-const port = 5000;
+const handleError = require('./error/errorHandle')
+const bodyParser = require('body-parser')
+const jwt = require('jsonwebtoken')
 const app = express()
+
+const port = 5000
 const hrs = (h) => h * 60 * 60 * 1000 // 1hour
 const AIserver = 'http://localhost:5500'
+const db = require('./DBConnection')
+
 app.use(bodyParser.json())
 app.use(express.urlencoded())
+app.set('secret', 'testsecret1')
 
 
 // var sql = require('mysql')
@@ -54,54 +58,6 @@ app.get('/test', (req, res) => {
   const testEntity = new TestModel({ test: 'test1' })
   console.log(testEntity)
 });
-
-app.get('/api/insert', (req, res) => {
-  console.log('insert GET')
-  const checkToken = handleUserToken(req.body.token)
-  if (!checkToken) {
-    res.status(500).json({ msg: 'auth failed' })
-  } else {
-    mikujiActions.insertMikuji(res, null)
-  }
-})
-
-app.post('/api/insert_AI', (req, res) => {
-  console.log('insert POST')
-  const checkToken = handleUserToken(req.body.token)
-  if (!checkToken) {
-    res.status(500).json({ msg: 'auth failed' })
-  } else {
-    fetch(AIserver + '/predict', {
-      method: 'POST',
-      body: JSON.stringify(req.body),
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then(response => response.json())
-      .then(result => utils.judgePredict(result.predict))
-      .then(fate => {
-        mikujiActions.insertMikuji(res, fate)
-      }).catch(err => {
-        console.log(err)
-        return res.status(400).json({ err: err })
-      })
-  }
-})
-
-app.post('/api/insert', (req, res) => {
-  console.log(req.body, 'add mikuji')
-  const checkToken = handleUserToken(req.body.token)
-  if (!checkToken) {
-    res.status(500).json({ msg: 'auth failed' })
-  } else if (req.body.mikuji) {
-    MikujiModel.create(req.body.mikuji, (err, ent) => {
-      if (err) return res.status(400).send(handleError(err))
-      console.log(ent)
-      res.status(200).send('ok')
-    })
-  } else {
-    res.status(400).send('no mikuji found')
-  }
-})
 
 app.get('/api/mikuji', (req, res) => {
   console.log('random one mikuji')
@@ -149,42 +105,79 @@ app.post('/api/user', (req, res) => {
 
 app.post('/api/login', (req, res) => {
   console.log('login')
-  UserModel.find({ name: req.body.name, password: req.body.password })
+  UserModel.findOne({ name: req.body.name, password: req.body.password })
     .then(data => {
-      if (data.length === 0) {
-        console.log('Login failed')
-        return res.status(401).json({ errmsg: 'Login failed' })
+      if (!data) {
+        res.status(401).json({ msg: 'Authenticate failed.' })
       } else {
-        const nowTime = Date.now()
-        const token = utils.encode(nowTime.toString().concat('-' + data[0].name))
-        console.log(`now: ${nowTime}, token: ${token}`)
-        UserModel.updateOne(
-          { name: req.body.name, password: req.body.password },
-          {
-            $set: { token: token, expired: nowTime + hrs(1) }
-          }).then(() => {
-            return res.status(200).json({ token: token })
-          })
+        const token = jwt.sign(data.toJSON(), app.get('secret'), {
+          expiresIn: 60 * 60 * 20
+        })
+        res.status(200).json({
+          msg: 'Login success',
+          token: token
+        })
       }
     })
     .catch(err => {
-      return res.status(500).json({ errmsg: err })
+      return res.status(500).json({ msg: err })
     })
 })
 
-app.get('/api/redirect', (req, res) => {
-  console.log('redirect')
-  fetch(AIserver + '/test')
-    .then(response => {
-      return response.json()
-    }).then(data => {
-      console.log(data)
-      res.status(200).json(data)
+const appAuth = express.Router()
+
+appAuth.use(function (req, res, next) {
+  var token = req.body.token || req.query.token || req.headers['x-access-token']
+  if (token) {
+    jwt.verify(token, app.get('secret'), (err, decoded) => {
+      if (err) {
+        return res.json({ msg: 'Failed to authenticate token.' })
+      } else {
+        req.decoded = decoded
+        next()
+      }
+    })
+  } else {
+    return res.status(401).json({ msg: 'No token provided.' })
+  }
+})
+
+appAuth.get('/api/insert', (req, res) => {
+  console.log('insert GET')
+  mikujiActions.insertMikuji(res, null)
+})
+
+appAuth.post('/api/insert_AI', (req, res) => {
+  console.log('insert POST')
+  fetch(AIserver + '/predict', {
+    method: 'POST',
+    body: JSON.stringify(req.body),
+    headers: { 'Content-Type': 'application/json' },
+  })
+    .then(response => response.json())
+    .then(result => utils.judgePredict(result.predict))
+    .then(fate => {
+      mikujiActions.insertMikuji(res, fate)
     }).catch(err => {
-      console.log('err', err)
-      res.status(400).json({ err: err.code })
+      console.log(err)
+      return res.status(400).json({ err: err })
     })
 })
+
+appAuth.post('/api/insert', (req, res) => {
+  console.log(req.body, 'add mikuji')
+  if (req.body.mikuji) {
+    MikujiModel.create(req.body.mikuji, (err, ent) => {
+      if (err) return res.status(400).send(handleError(err))
+      console.log(ent)
+      res.status(200).send('ok')
+    })
+  } else {
+    res.status(400).send('no mikuji found')
+  }
+})
+
+app.use('', appAuth)
 
 app.listen(port, () => {
   console.log("info", 'Server is running at port : ' + port);
