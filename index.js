@@ -11,7 +11,7 @@ const utils = require('./util/util')
 const mikujiActions = require('./action/mikuji')
 const port = 5000;
 const app = express()
-const hrs = 1 // 1hour
+const hrs = (h) => h * 60 * 60 * 1000 // 1hour
 const AIserver = 'http://localhost:5500'
 app.use(bodyParser.json())
 app.use(express.urlencoded())
@@ -35,6 +35,16 @@ app.use(express.urlencoded())
 //     console.log(err)
 // })
 
+const handleUserToken = (token) => {
+  const auths = utils.decode(token).split('-') // 0=>time 1=>username
+  console.log(auths)
+  if (auths[0] && Date.now() - Number(auths[0]) <= hrs(1)) {
+    return utils.encode(Date.now().toString() + '-' + auths[1])
+  } else {
+    return null
+  }
+}
+
 app.get('/', (req, res) => {
   console.log(connection)
 });
@@ -51,22 +61,27 @@ app.get('/api/insert', (req, res) => {
 
 app.post('/api/insert_AI', (req, res) => {
   console.log('insert POST')
-  fetch(AIserver + '/predict', {
-    method: 'POST',
-    body: JSON.stringify(req.body),
-    headers: { 'Content-Type': 'application/json' },
-  })
-    .then(response => response.json())
-    .then(result => {
-      const predict = result.predict
-      // console.log(result)
-      return utils.judgePredict(predict)
-    }).then(fate => {
-      mikujiActions.insertMikuji(res, fate)
-    }).catch(err => {
-      console.log(err)
-      return res.status(400).json({ err: err })
+  const checkToken = handleUserToken(req.body.token)
+  if (!checkToken) {
+    res.status(500).json({ msg: 'auth failed' })
+  } else {
+    fetch(AIserver + '/predict', {
+      method: 'POST',
+      body: JSON.stringify(req.body),
+      headers: { 'Content-Type': 'application/json' },
     })
+      .then(response => response.json())
+      .then(result => {
+        const predict = result.predict
+        console.log(result)
+        return utils.judgePredict(predict)
+      }).then(fate => {
+        mikujiActions.insertMikuji(res, fate)
+      }).catch(err => {
+        console.log(err)
+        return res.status(400).json({ err: err })
+      })
+  }
 })
 
 app.post('/api/insert', (req, res) => {
@@ -122,13 +137,12 @@ app.post('/api/login', (req, res) => {
         return res.status(401).json({ errmsg: 'Login failed' })
       } else {
         const nowTime = Date.now()
-        const combine = Buffer.from(nowTime.toString().concat(data[0].name))
-        const token = combine.toString('base64')
+        const token = utils.encode(nowTime.toString().concat('-' + data[0].name))
         console.log(`now: ${nowTime}, token: ${token}`)
         UserModel.updateOne(
           { name: req.body.name, password: req.body.password },
           {
-            $set: { token: token, expired: nowTime + (hrs * 60 * 60 * 1000) }
+            $set: { token: token, expired: nowTime + hrs(1) }
           }).then(() => {
             return res.status(200).json({ token: token })
           })

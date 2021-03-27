@@ -12,7 +12,7 @@ exports.insertMikuji = (res, fate) => {
       return [key, data[utils.rand(data.length)][key]]
     }))
     // console.log(newKuji)
-    MikujiModel.create(newKuji, (req, res) => {
+    MikujiModel.create(newKuji, (err, ent) => {
       if (err) return res.status(400).send(handleError(err))
       // console.log(ent)
       res.status(200).send('ok')
