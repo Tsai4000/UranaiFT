@@ -27,8 +27,8 @@ exports.randomMikuji = (res, fate) => {
     { $match: fate ? { fate: fate } : {} },
     { $sample: { size: 1 } },
     { $project: { _id: false, __v: false } }
-  ]).toArray((err, data) => {
-    if (err) return res.status(400).json({ err: err.details[0].message })
+  ]).then(data => {
+    if (data.length === 0) return res.status(400).json({ err: 'nodata' })
     console.log(data)
     res.status(200).json(data[0])
   })

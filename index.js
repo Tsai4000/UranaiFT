@@ -67,7 +67,7 @@ app.get('/api/mikuji', (req, res) => {
 app.post('/api/mikuji', (req, res) => {
   console.log('random one mikuji with Pic')
   // const userInput = req.body.Imgdata
-  RKGKModel.create({ data: req.body.imgData, accuracy: 1 }, (err, ent) => {
+  RKGKModel.create({ data: req.body.imgData, target: 1 }, (err, ent) => {
     if (err) return res.status(400).send(handleError(err))
     // console.log(ent)
   })
@@ -127,7 +127,8 @@ app.post('/api/login', (req, res) => {
 const appAuth = express.Router()
 
 appAuth.use(function (req, res, next) {
-  const token = req.body.token || req.query.token || req.headers['authorization'].replace('Bearer ', '')
+  console.log('check auth')
+  const token = req.body.token || req.query.token || (req.headers['authorization'] && req.headers['authorization'].replace('Bearer ', ''))
   if (token) {
     jwt.verify(token, app.get('secret'), (err, decoded) => {
       if (err) {
@@ -147,8 +148,21 @@ appAuth.get('/api/insert', (req, res) => {
   mikujiActions.insertMikuji(res, null)
 })
 
+appAuth.post('/api/insert', (req, res) => {
+  console.log('add mikuji')
+  if (req.body.mikuji) {
+    MikujiModel.create(req.body.mikuji, (err, ent) => {
+      if (err) return res.status(400).send(handleError(err))
+      console.log(ent)
+      res.status(200).send('ok')
+    })
+  } else {
+    res.status(400).send({ msg: "Bad request" })
+  }
+})
+
 appAuth.post('/api/insert_AI', (req, res) => {
-  console.log('insert POST')
+  console.log('insert_AI POST')
   fetch(AIserver + '/predict', {
     method: 'POST',
     body: JSON.stringify(req.body),
@@ -163,20 +177,6 @@ appAuth.post('/api/insert_AI', (req, res) => {
       return res.status(400).json({ err: err })
     })
 })
-
-appAuth.post('/api/insert', (req, res) => {
-  console.log(req.body, 'add mikuji')
-  if (req.body.mikuji) {
-    MikujiModel.create(req.body.mikuji, (err, ent) => {
-      if (err) return res.status(400).send(handleError(err))
-      console.log(ent)
-      res.status(200).send('ok')
-    })
-  } else {
-    res.status(400).send('no mikuji found')
-  }
-})
-
 app.use('', appAuth)
 
 app.listen(port, () => {
