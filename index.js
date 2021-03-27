@@ -4,6 +4,7 @@ const TestModel = require('./model/model')
 const SampleModel = require('./model/sample')
 const MikujiModel = require('./model/mikuji')
 const UserModel = require('./model/user')
+const RKGKModel = require('./model/RKGKdata')
 const handleError = require('./error/errorHandle')
 const bodyParser = require('body-parser')
 const db = require('./DBConnection')
@@ -102,16 +103,29 @@ app.post('/api/insert', (req, res) => {
   }
 })
 
-app.get('/api/hiku', (req, res) => {
+app.get('/api/mikuji', (req, res) => {
   console.log('random one mikuji')
-  db.collection('mikujis').aggregate([
-    { $sample: { size: 1 } },
-    { $project: { _id: false, __v: false } }
-  ]).toArray((err, data) => {
-    if (err) return res.status(400).send(err.details[0].message)
-    console.log(data)
-    res.status(200).json(data[0])
+  return mikujiActions.randomMikuji(res, null)
+})
+
+app.post('/api/mikuji', (req, res) => {
+  console.log('random one mikuji with Pic')
+  // const userInput = req.body.Imgdata
+  RKGKModel.create({ data: req.body.imgData, accuracy: 1 }, (err, ent) => {
+    if (err) return res.status(400).send(handleError(err))
+    // console.log(ent)
   })
+  fetch(AIserver + '/predict', {
+    method: 'POST',
+    body: JSON.stringify(req.body),
+    headers: { 'Content-Type': 'application/json' },
+  }).then(response => response.json())
+    .then(result => utils.judgePredict(result.predict))
+    .then(fate => {
+      return mikujiActions.randomMikuji(res, fate)
+    }).catch(err => {
+      return res.status(401).json({ err: err })
+    })
 })
 
 app.post('/api/user', (req, res) => {
