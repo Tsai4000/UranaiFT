@@ -24,7 +24,7 @@ const Main = () => {
 
   const hiku = () => {
     fetch('/api/mikuji')
-      .then(res => res.json())
+      .then(res => res.status === 200 ? res.json() : null)
       .then(data => dispatch({
         type: "MIKUJI_STORE",
         payload: data

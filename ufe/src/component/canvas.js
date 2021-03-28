@@ -48,14 +48,13 @@ const Canvas = ({ width: w, height: h, api: api }) => {
       headers: {
         'Content-Type': 'application/json'
       }
-    }).then(res => {
-      return res.json()
-    }).then(response => {
-      dispatch({
-        type: "MIKUJI_STORE",
-        payload: response
+    }).then(res => res.status === 200 ? res.json() : null)
+      .then(response => {
+        dispatch({
+          type: "MIKUJI_STORE",
+          payload: response
+        })
       })
-    })
   }
   const startDrawing = ({ nativeEvent }) => {
     const { offsetX, offsetY } = nativeEvent
