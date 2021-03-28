@@ -46,6 +46,7 @@ const Canvas = ({ width: w, height: h, api: api }) => {
         imgData: arrayBuffer,
       }),
       headers: {
+        'Authorization': localStorage.authToken || null,
         'Content-Type': 'application/json'
       }
     }).then(res => res.status === 200 ? res.json() : null)
