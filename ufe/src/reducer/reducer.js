@@ -1,7 +1,9 @@
 const TEST_STORE = 'TEST_STORE';
+const MIKUJI_STORE = "MIKUJI_STORE"
 
 const initState = {
   testStore: 'init',
+  mikuji: null
 };
 
 const reducer = (state = initState, action) => {
@@ -10,6 +12,11 @@ const reducer = (state = initState, action) => {
       return {
         testStore: action.payload,
       };
+    }
+    case MIKUJI_STORE: {
+      return {
+        mikuji: action.payload
+      }
     }
     default:
       return state;
