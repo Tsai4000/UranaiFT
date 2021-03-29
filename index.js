@@ -141,11 +141,12 @@ appAuth.get('/api/insert', (req, res) => {
 appAuth.post('/api/insert', (req, res) => {
   console.log('add mikuji')
   if (req.body.mikuji) {
-    MikujiModel.create(req.body.mikuji, (err, ent) => {
-      if (err) return res.status(400).send(handleError(err))
-      console.log(ent)
-      res.status(200).send('ok')
-    })
+    MikujiModel.create(req.body.mikuji,
+      (err, ent) => {
+        if (err) return res.status(400).send(handleError(err))
+        console.log(ent)
+        res.status(200).json(req.body.mikuji)
+      })
   } else {
     res.status(400).send({ msg: "Bad request" })
   }

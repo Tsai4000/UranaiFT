@@ -32,7 +32,7 @@ describe('test API xx', () => {
       })
       .expect(200)
       .end((err, res) => {
-        authToken = res.body.token // get jwt
+        authToken = 'Bearer ' + res.body.token // get jwt
         done()
       })
   })
@@ -43,7 +43,7 @@ describe('test API xx', () => {
       .expect(200)
       .end((err, res) => {
         if (err) done(err)
-        expect(res.text).to.equal('ok')
+        expect(res.body).to.have.keys(Object.entries(testMikuji.mikuji).map((([key, v]) => key)))
         done()
       })
   })
@@ -64,7 +64,7 @@ describe('test API xx', () => {
       .expect(200)
       .end((err, res) => {
         if (err) done(err)
-        expect(res.text).to.equal('ok')
+        expect(res.body).to.have.keys(Object.entries(testMikuji.mikuji).map((([key, v]) => key)))
         done()
       })
   })
@@ -95,11 +95,11 @@ describe('test API xx', () => {
     api.post('/api/insert_AI')
       .set('Accept', 'application/json')
       .set('Authorization', authToken)
-      .send({ imgdata: 'testdata' })
+      .send({ imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAAAAACreq1xAAAEGklEQVRYCa3Bf2iUBRzH8ffnHOamzRylzs2mf1hJiGml+EeaWJqVRoos6VTqj6gVBEEJoZEmVPRPCCUElTipGFpkaJkjrIxUsrLMIPphdjcmY7qU5sx235577sfunue555479nqJCFbu6vhpc/dEohBl1Vz+bjYoJaIQZdmYf3CYiEKUMfN74TIRhSjDYobLRBQinIksE1GIUCZyTEQhwtiKD8gxEYUIsaD9WvJMRCFCWMzIMxGFKK392KsMMRGFKM1ixhATUYiSuuOdFDARhShl5KWYUcBEFCJQchKM66NQY9fY85QnAtiqXQSwC/WUJfxsy0aC2YHFlCF8bP9dlLJsz8KDhBJevScWEML23UMY4bGifTShjtbfQAhRbMXumBHuZM31RkmiyN17Y0Y5P/56PyWJQks+ERGcfOgIpYhCJiKx2z+nBDFEKRGR3XScYGLIW7fOICoTwcQQEzl7Zw62EGbZptkEEnnbejeQZWvbW98TYUwEEnkmsqYfnABdx5cSYszZkQQROS2nREbs7bWj+0k0iTCpab8RQOSYyDJcZ9reJ4yJACJr1EWR9c7qrm+WiVeeFmF2/P48fiLLRJ5x25fwxiMijFLCT2SZyGvs2vgCbdtMuK7qI9DP0/ETGfuXUGDKH3y2CBMuE4GWr1yHj8iwmFHAAJlwmQhmwke4uuOdFDEtX9V2AZeJYAOj8BEuixklxXcSrPHYJLxE2vgzwufjpWTEd5JRN+sripjwEmk2vgePv+stRkZ8Jxl/tlDMagbxEGkmij3z8pYNoy7h+mtuF67F+0Wx2n7hIdJMFLryPFMGuiecIQkTR4BwDY7Ay4SHcDzYcZkCXY0Is0MLB0lLNOMy4WPCQzhMDJl+kvPz1q9NTT1NRqIZxx0H2HMfXiY8hMNEjlI4Bmpt6imyEs3Aok5pXO+/V1DMhIdwmOr6ybJtj5G8OO2L+eQkmmHTc8Kx/qWbv6WQCQ/huOXovnvJqPulaVwfcE0POYlmBo7OJyMZW/cpQ0x4iLQbT7C9hjiwapeMYolmazlNluYcpuEcOSY8RFkH59ZSaMYPrR1kmfAQVTCRMWlDGx6iGiZc1nAOD1ENEy4TXqIarYeSpJnwEtVoIonjgc3X4SWq0UQSx381+IhqzEkmAaWEj6iGibSv5+EjqmHC8e6bnfiIaphwmPATVXiqIwHU9tbhJ6pgMQNMBBCVM5FmIoComAmX0XO5CS9RKbuzk7w47fDhw2fJExWac0R4Wf0FckSFLGb49Fy9u3UQl6iMiUBj+1IjSBMVMZF1qgWPmkEcohL2+Ou4+msnJwgkKhDf2kDa9nWvPUEJogImHKcnP7mVkkR0jy5YzY41zDtMCBFd+xrj2RcJJ6Kb9VEzZYlhJoaZGGZimIlhJobZ/97XPGCXluv4AAAAAElFTkSuQmCC' })
       .expect(200)
       .end((err, res) => {
         if (err) done(err)
-        expect(res.text).to.equal('ok')
+        expect(res.body).to.have.keys(Object.entries(testMikuji.mikuji).map((([key, v]) => key)))
         done()
       })
   })
@@ -126,7 +126,7 @@ describe('test API xx', () => {
   it('POST mikuji should response 200 with correct body', (done) => {
     api.post('/api/mikuji')
       .set('Accept', 'application/json')
-      .send({ imgData: 'testdata' })
+      .send({ imgData: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAAAAACreq1xAAAEGklEQVRYCa3Bf2iUBRzH8ffnHOamzRylzs2mf1hJiGml+EeaWJqVRoos6VTqj6gVBEEJoZEmVPRPCCUElTipGFpkaJkjrIxUsrLMIPphdjcmY7qU5sx235577sfunue555479nqJCFbu6vhpc/dEohBl1Vz+bjYoJaIQZdmYf3CYiEKUMfN74TIRhSjDYobLRBQinIksE1GIUCZyTEQhwtiKD8gxEYUIsaD9WvJMRCFCWMzIMxGFKK392KsMMRGFKM1ixhATUYiSuuOdFDARhShl5KWYUcBEFCJQchKM66NQY9fY85QnAtiqXQSwC/WUJfxsy0aC2YHFlCF8bP9dlLJsz8KDhBJevScWEML23UMY4bGifTShjtbfQAhRbMXumBHuZM31RkmiyN17Y0Y5P/56PyWJQks+ERGcfOgIpYhCJiKx2z+nBDFEKRGR3XScYGLIW7fOICoTwcQQEzl7Zw62EGbZptkEEnnbejeQZWvbW98TYUwEEnkmsqYfnABdx5cSYszZkQQROS2nREbs7bWj+0k0iTCpab8RQOSYyDJcZ9reJ4yJACJr1EWR9c7qrm+WiVeeFmF2/P48fiLLRJ5x25fwxiMijFLCT2SZyGvs2vgCbdtMuK7qI9DP0/ETGfuXUGDKH3y2CBMuE4GWr1yHj8iwmFHAAJlwmQhmwke4uuOdFDEtX9V2AZeJYAOj8BEuixklxXcSrPHYJLxE2vgzwufjpWTEd5JRN+sripjwEmk2vgePv+stRkZ8Jxl/tlDMagbxEGkmij3z8pYNoy7h+mtuF67F+0Wx2n7hIdJMFLryPFMGuiecIQkTR4BwDY7Ay4SHcDzYcZkCXY0Is0MLB0lLNOMy4WPCQzhMDJl+kvPz1q9NTT1NRqIZxx0H2HMfXiY8hMNEjlI4Bmpt6imyEs3Aok5pXO+/V1DMhIdwmOr6ybJtj5G8OO2L+eQkmmHTc8Kx/qWbv6WQCQ/huOXovnvJqPulaVwfcE0POYlmBo7OJyMZW/cpQ0x4iLQbT7C9hjiwapeMYolmazlNluYcpuEcOSY8RFkH59ZSaMYPrR1kmfAQVTCRMWlDGx6iGiZc1nAOD1ENEy4TXqIarYeSpJnwEtVoIonjgc3X4SWq0UQSx381+IhqzEkmAaWEj6iGibSv5+EjqmHC8e6bnfiIaphwmPATVXiqIwHU9tbhJ6pgMQNMBBCVM5FmIoComAmX0XO5CS9RKbuzk7w47fDhw2fJExWac0R4Wf0FckSFLGb49Fy9u3UQl6iMiUBj+1IjSBMVMZF1qgWPmkEcohL2+Ou4+msnJwgkKhDf2kDa9nWvPUEJogImHKcnP7mVkkR0jy5YzY41zDtMCBFd+xrj2RcJJ6Kb9VEzZYlhJoaZGGZimIlhJobZ/97XPGCXluv4AAAAAElFTkSuQmCC' })
       .expect(200)
       .end((err, res) => {
         if (err) done(err)

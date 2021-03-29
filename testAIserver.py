@@ -48,8 +48,8 @@ gn, gRandomNormal = Gmodel.get_config(
 dn, dx, dy, dt = Dmodel.get_config(
 )['layers'][0]['config']['batch_input_shape']
 
-# Dmodel.compile(optimizer=optimizer, loss=wasserstein_loss,
-#                metrics=['accuracy'])
+Dmodel.compile(optimizer=optimizer, loss=wasserstein_loss,
+               metrics=['accuracy'])
 
 
 def imgBase64Decode(inpImg):
@@ -89,4 +89,5 @@ def predict():
     return make_response(jsonify({"result": str(result)}), 200)
 
 
+# host=0.0.0.0 to set server visible
 app.run(port=5500, debug=True, threaded=True)
